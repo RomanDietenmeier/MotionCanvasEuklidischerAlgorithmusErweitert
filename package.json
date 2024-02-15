@@ -1,0 +1,23 @@
+{
+  "name": "euclid-algo",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "start": "vite",
+    "serve": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@motion-canvas/2d": "^3.14.2",
+    "@motion-canvas/core": "^3.14.1",
+    "@motion-canvas/ffmpeg": "^1.1.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@motion-canvas/ui": "^3.14.2",
+    "@motion-canvas/vite-plugin": "^3.14.1",
+    "@types/lodash": "^4.14.202",
+    "typescript": "^5.2.2",
+    "vite": "^4.0.0"
+  }
+}
