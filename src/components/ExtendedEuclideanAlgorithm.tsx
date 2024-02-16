@@ -1,10 +1,18 @@
 import { Node, NodeProps, Rect, Txt, initial, signal } from "@motion-canvas/2d";
-import { SimpleSignal } from "@motion-canvas/core";
+import {
+  Reference,
+  SignalValue,
+  SimpleSignal,
+  all,
+  createRef,
+  sequence,
+  waitFor,
+} from "@motion-canvas/core";
 import _ from "lodash";
 
 export interface ExtendedEuclideanAlgorithmProps extends NodeProps {
-  a?: number;
-  b?: number;
+  a?: SignalValue<number>;
+  b?: SignalValue<number>;
 }
 
 export class ExtendedEuclideanAlgorithm extends Node {
@@ -15,13 +23,15 @@ export class ExtendedEuclideanAlgorithm extends Node {
   @signal()
   public declare readonly b: SimpleSignal<number, this>;
 
-  private oneRowToMany: boolean;
+  private readonly rootNodeRef;
+  private readonly rectRefs: Array<Reference<Rect>> = [];
 
-  public constructor(props?: NodeProps) {
+  public constructor(props?: ExtendedEuclideanAlgorithmProps) {
     super({
       ...props,
     });
-    this.oneRowToMany = false;
+
+    this.rootNodeRef = createRef<Node>();
 
     if (this.b() > this.a()) {
       let temp = this.a();
@@ -51,31 +61,35 @@ export class ExtendedEuclideanAlgorithm extends Node {
     let lastAThrougB: number = -1;
     let lastLastAThrougB: number = -1;
 
+    for (let i = 0; i < rows * 7; i++) {
+      this.rectRefs.push(createRef<Rect>());
+    }
+
     this.add(
-      <Node>
+      <Node ref={this.rootNodeRef}>
         {_.times(rows, (i: number) => {
           if (i === 0)
             return (
               <>
-                <TxtColum column={0} row={i}>
+                <TxtColum ref={this.rectRefs[i * 7 + 0]} column={0} row={i}>
                   i
                 </TxtColum>
-                <TxtColum column={1} row={i}>
+                <TxtColum ref={this.rectRefs[i * 7 + 1]} column={1} row={i}>
                   a
                 </TxtColum>
-                <TxtColum column={2} row={i}>
+                <TxtColum ref={this.rectRefs[i * 7 + 2]} column={2} row={i}>
                   b
                 </TxtColum>
-                <TxtColum column={3} row={i}>
+                <TxtColum ref={this.rectRefs[i * 7 + 3]} column={3} row={i}>
                   a/b
                 </TxtColum>
-                <TxtColum column={4} row={i}>
+                <TxtColum ref={this.rectRefs[i * 7 + 4]} column={4} row={i}>
                   a%b
                 </TxtColum>
-                <TxtColum column={5} row={i}>
+                <TxtColum ref={this.rectRefs[i * 7 + 5]} column={5} row={i}>
                   s
                 </TxtColum>
-                <TxtColum column={6} row={i}>
+                <TxtColum ref={this.rectRefs[i * 7 + 6]} column={6} row={i}>
                   t
                 </TxtColum>
               </>
@@ -107,19 +121,35 @@ export class ExtendedEuclideanAlgorithm extends Node {
 
           const ret = (
             <>
-              <TxtColum column={0} row={i}>{`${i}`}</TxtColum>
-              <TxtColum column={1} row={i}>{`${a}`}</TxtColum>
-              <TxtColum column={2} row={i}>{`${
+              <TxtColum
+                ref={this.rectRefs[i * 7 + 0]}
+                column={0}
+                row={i}
+              >{`${i}`}</TxtColum>
+              <TxtColum
+                ref={this.rectRefs[i * 7 + 1]}
+                column={1}
+                row={i}
+              >{`${a}`}</TxtColum>
+              <TxtColum ref={this.rectRefs[i * 7 + 2]} column={2} row={i}>{`${
                 i == rows - 1 ? "-" : b
               }`}</TxtColum>
-              <TxtColum column={3} row={i}>{`${
+              <TxtColum ref={this.rectRefs[i * 7 + 3]} column={3} row={i}>{`${
                 lastLastAThrougB < 0 || i == rows - 1 ? "-" : lastLastAThrougB
               }`}</TxtColum>
-              <TxtColum column={4} row={i}>{`${
+              <TxtColum ref={this.rectRefs[i * 7 + 4]} column={4} row={i}>{`${
                 i == rows - 1 ? "-" : remainder
               }`}</TxtColum>
-              <TxtColum column={5} row={i}>{`${s}`}</TxtColum>
-              <TxtColum column={6} row={i}>{`${t}`}</TxtColum>
+              <TxtColum
+                ref={this.rectRefs[i * 7 + 5]}
+                column={5}
+                row={i}
+              >{`${s}`}</TxtColum>
+              <TxtColum
+                ref={this.rectRefs[i * 7 + 6]}
+                column={6}
+                row={i}
+              >{`${t}`}</TxtColum>
             </>
           );
 
@@ -130,11 +160,27 @@ export class ExtendedEuclideanAlgorithm extends Node {
       </Node>
     );
   }
+
+  public *show(duration: number, sequenceDelay: number = 0.1, rowDelay = 0.1) {
+    yield* all(...this.rectRefs.map((ref) => ref().opacity(0, 0)));
+
+    for (let i = 0; i < this.rectRefs.length; i += 7) {
+      const chunk = this.rectRefs.slice(i, i + 7);
+      yield* sequence(
+        sequenceDelay,
+        ...chunk.map((ref) => ref().opacity(1, duration))
+      );
+      if (i == this.rectRefs.length - 7) {
+        break;
+      }
+      yield* waitFor(rowDelay);
+    }
+  }
 }
 
-const TxtColum = function ({ children, column = 0, row = 0 }: any) {
+const TxtColum = function ({ children, column = 0, row = 0, ref }: any) {
   return (
-    <TableRect column={column} row={row}>
+    <TableRect column={column} row={row} ref={ref}>
       <Txt fill={"#fff"} fontWeight={700}>
         {children}
       </Txt>
@@ -142,7 +188,7 @@ const TxtColum = function ({ children, column = 0, row = 0 }: any) {
   );
 };
 
-const TableRect = function ({ children, column = 0, row = 0 }: any) {
+const TableRect = function ({ children, column = 0, row = 0, ref }: any) {
   let doubleColumnsInUse = 0;
   if (column > 1) {
     doubleColumnsInUse++;
@@ -155,6 +201,7 @@ const TableRect = function ({ children, column = 0, row = 0 }: any) {
   }
   return (
     <Rect
+      ref={ref}
       stroke={"#fff"}
       lineWidth={1}
       position={{
@@ -171,13 +218,3 @@ const TableRect = function ({ children, column = 0, row = 0 }: any) {
     </Rect>
   );
 };
-
-// //{" "}
-// <Grid
-//   width={800}
-//   stroke={"#fff"}
-//   height={rows * 100 + 100}
-//   spacing={100}
-// ></Grid>
-//{" "}
-// </Grid>
