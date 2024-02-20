@@ -15,7 +15,7 @@ export interface ExtendedEuclideanAlgorithmProps extends NodeProps {
   b?: SignalValue<number>;
 }
 
-export class ExtendedEuclideanAlgorithm extends Node {
+export class ExtendedEuclideanAlgorithmIterative extends Node {
   @initial(2079)
   @signal()
   public declare readonly a: SimpleSignal<number, this>;
@@ -175,6 +175,10 @@ export class ExtendedEuclideanAlgorithm extends Node {
       }
       yield* waitFor(rowDelay);
     }
+  }
+
+  public *hide() {
+    yield* all(...this.rectRefs.map((ref) => ref().opacity(0, 0)));
   }
 }
 
