@@ -64,6 +64,15 @@ int main(int argc, char *argv[])
     t = lastLastT - lastT * lastLastAThroughB;
     printf("%2d | %4d %4d |    -    - | %4d %4d\n", i, a, b, s, t);
 
+    printf("GCD(%d, %d) = %d\n", aOriginal, bOriginal, a);
+
+    if (a != 1)
+    {
+        printf("Modular multiplicative inverse of %d mod %d does not exist!\n", bOriginal, aOriginal);
+        printf("GCD(%d, %d) has to be 1 for the Modular multiplicative inverse to exist!\n", aOriginal, bOriginal);
+        return 0;
+    }
+
     int modularMultiplicateInverse = t;
     if (modularMultiplicateInverse < 0)
     {
