@@ -1,6 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+void encodeDecodeNumbersInputOutputLoop(int a, int b, int modularMultiplicateInverse);
+void encodeDecodeCharactersInputOutputLoop(int a, int b, int modularMultiplicateInverse);
 
 int main(int argc, char *argv[])
 {
@@ -68,25 +72,90 @@ int main(int argc, char *argv[])
         modularMultiplicateInverse += aOriginal;
     }
     printf("Modular inverse of %d mod %d = %d\n", bOriginal, aOriginal, modularMultiplicateInverse);
+    printf("\n");
 
+    if (argc > 3)
+    {
+        encodeDecodeCharactersInputOutputLoop(aOriginal, bOriginal, modularMultiplicateInverse);
+    }
+    else
+    {
+        encodeDecodeNumbersInputOutputLoop(aOriginal, bOriginal, modularMultiplicateInverse);
+    }
+
+    return 0;
+}
+
+void encodeDecodeNumbersInputOutputLoop(int a, int b, int modularMultiplicateInverse)
+{
     int numberToEncode;
     int encodedNumber;
     while (1)
     {
         printf("Enter number to encode: ");
         scanf("%d", &numberToEncode);
-        if (numberToEncode >= aOriginal || (numberToEncode < 0 && numberToEncode <= -aOriginal))
+        if (numberToEncode >= a || (numberToEncode < 0 && numberToEncode <= -a))
         {
-            printf("Number to encode must be less than %d\n", aOriginal);
+            printf("Number to encode must be less than %d\n", a);
             continue;
         }
-        encodedNumber = (numberToEncode * bOriginal) % aOriginal;
+        encodedNumber = (numberToEncode * b) % a;
         printf("Encode number:\n");
-        printf("%d * %d mod %d = %d\n", numberToEncode, bOriginal, aOriginal, encodedNumber);
+        printf("%d * %d mod %d = %d\n", numberToEncode, b, a, encodedNumber);
 
         printf("Decode number:\n");
-        printf("%d * %d mod %d = %d\n", encodedNumber, modularMultiplicateInverse, aOriginal, (encodedNumber * modularMultiplicateInverse) % aOriginal);
+        printf("%d * %d mod %d = %d\n", encodedNumber, modularMultiplicateInverse, a, (encodedNumber * modularMultiplicateInverse) % a);
+        printf("\n");
     }
+}
 
-    return 0;
+void encodeDecodeCharactersInputOutputLoop(int a, int b, int modularMultiplicateInverse)
+{
+    char *charactersToEncode = calloc(300, sizeof(char));
+    int *encodedCharacters = calloc(300, sizeof(int));
+    while (1)
+    {
+        printf("Enter text to encode:\n");
+        scanf("%[^\n]%*c", charactersToEncode);
+
+        for (int i = 0; 300; i++)
+        {
+            if (charactersToEncode[i] == '\0')
+            {
+                encodedCharacters[i] = charactersToEncode[i];
+                break;
+            }
+            if (charactersToEncode[i] >= a || (charactersToEncode[i] < 0 && charactersToEncode[i] <= -a))
+            {
+                printf("Character to encode must be less than %d\n", a);
+                encodedCharacters[i] = '\0';
+                continue;
+            }
+            encodedCharacters[i] = ((int)(charactersToEncode[i]) * b) % a;
+        }
+        printf("Encoded text:\n");
+        for (int i = 0; i < 300; i++)
+        {
+            for (int j = 0; j < sizeof(int); j++)
+            {
+                int temp = encodedCharacters[i];
+                temp <<= 8 * j;
+                printf("%c", (char)temp);
+            }
+        }
+        printf("\n");
+
+        printf("Decoded text:\n");
+        for (int i = 0; 300; i++)
+        {
+            if (encodedCharacters[i] == '\0')
+            {
+                break;
+            }
+            printf("%c", (encodedCharacters[i] * modularMultiplicateInverse) % a);
+        }
+        printf("\n");
+    }
+    free(charactersToEncode);
+    free(encodedCharacters);
 }
