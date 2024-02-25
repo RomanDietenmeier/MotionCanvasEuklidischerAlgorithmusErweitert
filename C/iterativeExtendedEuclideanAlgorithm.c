@@ -18,13 +18,8 @@ int main(int argc, char *argv[])
     printf("--------------------------------------\n");
     while (aModB)
     {
-        lastLastAThroughB = lastAThroughB;
-        lastAThroughB = aThroughB;
 
-        aThroughB = a / b;
-        aModB = a % b;
-
-        if (i == 1)
+                if (i == 1)
         {
             s = 1;
             t = 0;
@@ -39,6 +34,12 @@ int main(int argc, char *argv[])
             s = lastLastS - lastS * lastLastAThroughB;
             t = lastLastT - lastT * lastLastAThroughB;
         }
+
+        aThroughB = a / b;
+        aModB = a % b;
+
+        lastLastAThroughB = lastAThroughB;
+        lastAThroughB = aThroughB;
 
         lastLastS = lastS;
         lastS = s;
