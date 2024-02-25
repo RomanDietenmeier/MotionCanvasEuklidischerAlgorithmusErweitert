@@ -25,7 +25,7 @@ export default makeScene2D(function* (view) {
   );
   yield* euclideanIterativeRef().hide();
   yield* euclideanRecursiveRef().show(1, 0.1);
-  // yield* euclideanRecursiveRef().hide();
-  // yield* euclideanIterativeRef().show(0.1, 0.01);
+  yield* euclideanRecursiveRef().hide();
+  yield* euclideanIterativeRef().show(1, 0.1);
   yield* waitFor(1);
 });
